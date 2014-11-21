@@ -1,4 +1,4 @@
-package net.aimeizi.jest;
+package net.aimeizi.jest.client.jest;
 
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
@@ -11,6 +11,8 @@ import io.searchbox.core.SearchResult.Hit;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+
+import net.aimeizi.jest.Article;
 
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -29,11 +31,11 @@ public class JestExample {
 	private static void createSearch() throws Exception {
 		JestClient jestClient = JestExample.getJestClient();
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		searchSourceBuilder.query(QueryBuilders.matchQuery("content", "新西兰"));
+		searchSourceBuilder.query(QueryBuilders.queryString("雾霾"));
 		HighlightBuilder highlightBuilder = new HighlightBuilder();
-		highlightBuilder.field("title");
-		highlightBuilder.field("content");
-		highlightBuilder.preTags("<em>").postTags("</em>");
+		highlightBuilder.field("title");//高亮title
+		highlightBuilder.field("content");//高亮content
+		highlightBuilder.preTags("<em>").postTags("</em>");//高亮标签
 		searchSourceBuilder.highlight(highlightBuilder);
 		Search search = new Search.Builder(searchSourceBuilder.toString())
         .addIndex("article")
@@ -43,12 +45,13 @@ public class JestExample {
 		List<Hit<Article,Void>> hits = result.getHits(Article.class);
 		for (Hit<Article, Void> hit : hits) {
 			Article source = hit.source;
+			//获取高亮后的内容
 			Map<String, List<String>> highlight = hit.highlight;
-			List<String> titlelist = highlight.get("title");
+			List<String> titlelist = highlight.get("title");//高亮后的title
 			if(titlelist!=null){
 				source.setTitle(titlelist.get(0));
 			}
-			List<String> contentlist = highlight.get("content");
+			List<String> contentlist = highlight.get("content");//高亮后的content
 			if(contentlist!=null){
 				source.setContent(contentlist.get(0));
 			}
