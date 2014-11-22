@@ -1,12 +1,26 @@
 package net.aimeizi.jest.client.jest;
 
+import io.searchbox.action.Action;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
+import io.searchbox.client.JestResult;
 import io.searchbox.client.config.HttpClientConfig;
+import io.searchbox.cluster.Health;
+import io.searchbox.cluster.NodesInfo;
+import io.searchbox.cluster.NodesStats;
+import io.searchbox.core.Delete;
+import io.searchbox.core.Get;
 import io.searchbox.core.Index;
 import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
 import io.searchbox.core.SearchResult.Hit;
+import io.searchbox.core.Suggest;
+import io.searchbox.indices.ClearCache;
+import io.searchbox.indices.CloseIndex;
+import io.searchbox.indices.DeleteIndex;
+import io.searchbox.indices.Flush;
+import io.searchbox.indices.IndicesExists;
+import io.searchbox.indices.Optimize;
 
 import java.util.Calendar;
 import java.util.List;
@@ -18,24 +32,196 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.highlight.HighlightBuilder;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 public class JestExample {
 	
-	
-	
 	public static void main(String[] args) throws Exception {
+//		deleteIndex();
 //		createIndex();
-		createSearch();
+		createSearch("性虐");
+//		createSuggest("性虐 床上 淤青 母亲 安全调侃 雾霾");
+//		getDocument("article","article","1");
+//		getDocument("article","article","2");
+//		getDocument("article","article","3");
+//		deleteDocument("article","article","1");
+//		nodesStats();
+//		health();
+//		nodesInfo();
+//		indicesExists();
+//		flush();
+//		optimize();
+//		closeIndex();
+//		clearCache();
 	}
 
+
+	/**
+	 * 将删除所有的索引
+	 * @throws Exception
+	 */
+	private static void deleteIndex() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		DeleteIndex deleteIndex = new DeleteIndex(new DeleteIndex.Builder("article")); 
+		JestResult result = jestClient.execute(deleteIndex);
+		System.out.println(result.getJsonString());
+	}
+
+
+
+	/**
+	 * 清缓存
+	 * @throws Exception
+	 */
+	private static void clearCache() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		ClearCache closeIndex = new ClearCache(new ClearCache.Builder()); 
+		JestResult result = jestClient.execute(closeIndex);
+		System.out.println(result.getJsonString());
+	}
+
+
+
+	/**
+	 * 关闭索引
+	 * @throws Exception
+	 */
+	private static void closeIndex() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		CloseIndex closeIndex = new CloseIndex.Builder("article").build(); 
+		JestResult result = jestClient.execute(closeIndex);
+		System.out.println(result.getJsonString());
+	}
+
+	/**
+	 * 优化索引
+	 * @throws Exception
+	 */
+	private static void optimize() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		Optimize optimize = new Optimize.Builder().build(); 
+		JestResult result = jestClient.execute(optimize);
+		System.out.println(result.getJsonString());
+	}
+
+	/**
+	 * 刷新索引
+	 * @throws Exception
+	 */
+	private static void flush() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		Flush flush = new Flush.Builder().build(); 
+		JestResult result = jestClient.execute(flush);
+		System.out.println(result.getJsonString());
+	}
+
+	/**
+	 * 判断索引目录是否存在
+	 * @throws Exception
+	 */
+	private static void indicesExists() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		IndicesExists indicesExists = new IndicesExists(new IndicesExists.Builder("article")); 
+		JestResult result = jestClient.execute(indicesExists);
+		System.out.println(result.getJsonString());
+	}
+
+	/**
+	 * 查看节点信息
+	 * @throws Exception
+	 */
+	private static void nodesInfo() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		NodesInfo nodesInfo = new NodesInfo(new NodesInfo.Builder()); 
+		JestResult result = jestClient.execute(nodesInfo);
+		System.out.println(result.getJsonString());
+	}
+
+
+	/**
+	 * 查看集群健康信息
+	 * @throws Exception
+	 */
+	private static void health() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		Health health = new Health(new Health.Builder()); 
+		JestResult result = jestClient.execute(health);
+		System.out.println(result.getJsonString());
+	}
+
+	/**
+	 * 节点状态
+	 * @throws Exception
+	 */
+	private static void nodesStats() throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		NodesStats nodesStats = new NodesStats(new NodesStats.Builder()); 
+		JestResult result = jestClient.execute(nodesStats);
+		System.out.println(result.getJsonString());
+	}
 	
-	private static void createSearch() throws Exception {
+	/**
+	 * 删除Document
+	 * @param index
+	 * @param type
+	 * @param id
+	 * @throws Exception
+	 */
+	private static void deleteDocument(String index,String type,String id) throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		Delete delete = new Delete.Builder(id).index(index).type(type).build();
+		JestResult result = jestClient.execute(delete);
+		System.out.println(result.getJsonString());
+	}
+
+	/**
+	 * 获取Document
+	 * @param index
+	 * @param type
+	 * @param id
+	 * @throws Exception
+	 */
+	private static void getDocument(String index,String type,String id) throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		Get get = new Get.Builder(index, id).type(type).build();
+		JestResult result = jestClient.execute(get);
+		Article article = result.getSourceAsObject(Article.class);
+		System.out.println(article.getTitle()+","+article.getContent());
+	}
+
+	/**
+	 * 搜索建议
+	 * @throws Exception
+	 */
+	private static void createSuggest(String queryString) throws Exception {
+		JestClient jestClient = JestExample.getJestClient();
+		String suggestString = "{\"my-suggest\" : {\"text\" : \""+queryString+"\",\"term\" : {\"field\" : \"\"}}}";
+		Action<JestResult> suggest = new Suggest.Builder(suggestString)
+			.addIndex("article")
+			.build();
+		JestResult jestResult = jestClient.execute(suggest);
+		if(jestResult.isSucceeded()){
+			JsonObject jsonObject = jestResult.getJsonObject();
+			JsonArray jsonArray = jsonObject.getAsJsonArray("my-suggest");
+			System.out.println("搜索建议如下:");
+			for (JsonElement jsonElement : jsonArray) {
+				System.out.println(jsonElement.getAsJsonObject().get("text").toString().replace("\"", ""));
+			}
+		}
+	}
+
+
+	private static void createSearch(String queryString) throws Exception {
 		JestClient jestClient = JestExample.getJestClient();
 		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-		searchSourceBuilder.query(QueryBuilders.queryString("雾霾"));
+		searchSourceBuilder.query(QueryBuilders.queryString(queryString));
 		HighlightBuilder highlightBuilder = new HighlightBuilder();
 		highlightBuilder.field("title");//高亮title
 		highlightBuilder.field("content");//高亮content
 		highlightBuilder.preTags("<em>").postTags("</em>");//高亮标签
+		highlightBuilder.fragmentSize(200);//高亮内容长度
 		searchSourceBuilder.highlight(highlightBuilder);
 		Search search = new Search.Builder(searchSourceBuilder.toString())
         .addIndex("article")
@@ -103,9 +289,12 @@ public class JestExample {
 		Index index1 = new Index.Builder(article1).index("article").type("article").build();
 		Index index2 = new Index.Builder(article2).index("article").type("article").build();
 		Index index3 = new Index.Builder(article3).index("article").type("article").build();
-		jestClient.execute(index1);
-		jestClient.execute(index2);
-		jestClient.execute(index3);
+		JestResult jestResult1 = jestClient.execute(index1);
+		System.out.println(jestResult1.getJsonString());
+		JestResult jestResult2 = jestClient.execute(index2);
+		System.out.println(jestResult2.getJsonString());
+		JestResult jestResult3 = jestClient.execute(index3);
+		System.out.println(jestResult3.getJsonString());
 	}
 
 

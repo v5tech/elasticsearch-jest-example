@@ -4,8 +4,6 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,7 +23,6 @@ import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.action.suggest.SuggestResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
@@ -42,12 +39,11 @@ import org.elasticsearch.index.query.WildcardQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.highlight.HighlightField;
-import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.Suggest.Suggestion;
 import org.elasticsearch.search.suggest.Suggest.Suggestion.Entry;
-import org.elasticsearch.search.suggest.Suggest.Suggestion.Entry.Option;
-import org.elasticsearch.search.suggest.SuggestBuilders;
-import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.term.TermSuggestion;
+import org.elasticsearch.search.suggest.term.TermSuggestion.Entry.Option;
+import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -393,26 +389,39 @@ public class TransportClient {
 	
 	private static void suggest(){
 		Client client = createTransportClient();
-		CompletionSuggestionBuilder completionSuggestion = SuggestBuilders.completionSuggestion("suggestion");
-		completionSuggestion.field("suggest");
-		SuggestResponse suggestResponse = client.prepareSuggest("article")
-				.setSuggestText("床")
-				.addSuggestion(completionSuggestion)
-				.execute().actionGet();
-		Suggest suggest = suggestResponse.getSuggest();
-		try {
-			Suggest.Suggestion suggestion = suggest.getSuggestion("suggestion");
-			Iterator<Entry> suggestionIterator = suggestion.iterator();
-		    while (suggestionIterator.hasNext()) {
-		        Entry entry = suggestionIterator.next();
-		        List<Entry.Option> options = entry.getOptions();
-		        for (Entry.Option option : options) {
-		            System.out.println(option.getText());
-		        }
-		    }
-		} catch (Exception e) {
-			e.printStackTrace();
+		
+//		CompletionSuggestionBuilder completionSuggestion = new CompletionSuggestionBuilder("suggestions");
+//		completionSuggestion.field("text");
+//		completionSuggestion.text("园");
+//		completionSuggestion.size(10);
+//		
+//		SuggestRequestBuilder suggestRequestBuilder = client.prepareSuggest("article");
+//		suggestRequestBuilder.addSuggestion(completionSuggestion);
+//		SuggestResponse suggestResponse = suggestRequestBuilder.execute().actionGet();
+//		
+//		Suggestion<? extends Entry<? extends Option>> suggestion = suggestResponse.getSuggest().getSuggestion("suggestions");
+//		for(Entry<? extends Option> entry:suggestion){
+//			for (Option option : entry) {
+//				System.out.println(option.getText().string());
+//			}
+//		}
+		
+		TermSuggestionBuilder termSuggestionBuilder = new TermSuggestionBuilder("suggest"); 
+		termSuggestionBuilder.text("编程");
+		termSuggestionBuilder.field("desc");
+		TermSuggestion termSuggestion = client.prepareSuggest("book")
+				.addSuggestion(termSuggestionBuilder)
+				.execute()
+				.actionGet()
+				.getSuggest()
+				.getSuggestion("suggest");
+		Suggestion<? extends Entry<? extends Option>> suggestion = termSuggestion;
+		for(Entry<? extends Option> entry:suggestion){
+			for (Option option : entry) {
+				System.out.println(option.getText().string());
+			}
 		}
+		
 	}
 	
 	
