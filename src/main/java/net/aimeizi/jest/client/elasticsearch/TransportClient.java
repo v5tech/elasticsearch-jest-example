@@ -1,41 +1,38 @@
 package net.aimeizi.jest.client.elasticsearch;
 
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.aimeizi.jest.Article;
-
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeRequest;
 import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
+import org.elasticsearch.action.bulk.BulkItemResponse;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.count.CountResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.query.IndicesQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.index.query.RegexpQueryBuilder;
-import org.elasticsearch.index.query.TermsQueryBuilder;
-import org.elasticsearch.index.query.WildcardQueryBuilder;
+import org.elasticsearch.index.query.*;
+import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.highlight.HighlightField;
@@ -45,8 +42,13 @@ import org.elasticsearch.search.suggest.term.TermSuggestion;
 import org.elasticsearch.search.suggest.term.TermSuggestion.Entry.Option;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 
 /**
  * 使用原生的Transport Client
@@ -73,7 +75,81 @@ public class TransportClient {
 		}
 		return client;
 	}
-	
+
+	public static void main(String[] args) throws Exception {
+
+//		deleteIndices("article");
+//		deleteIndices("book");
+//
+//		creatJsonStringIndex();
+//		creatMapIndex();
+//		creatBeanIndex();
+//		useXContentBuilderCreatIndex();
+
+//		deleteIndex("book","book","1");
+//		deleteIndex("book","book","2");
+//		deleteIndex("book","book","3");
+
+		updateIndexByDoc("book", "book", "1");
+		updateIndexByScript("book", "book", "1");
+		upsertIndex("book", "book", "1");
+
+		bulkIndex();
+
+		scrollSearchDelete("book", "desc", "语言");
+
+//		deleteIndex("article","article","1");
+//		deleteIndex("article","article","2");
+//		deleteIndex("article","article","3");
+
+//		deleteIndices("article");
+
+//		getIndex("book","book","1");
+//		getIndex("book","book","2");
+//		getIndex("book","book","3");
+//		getIndex("article","article","1");
+
+//		querySearch("book", "book", "desc", "方面");
+//		querySearch("book", "book", "desc", "语言");
+//		querySearch("book", "book", "desc", "设计");
+//		querySearch("article", "article", "content", "圆圆");
+
+//		querySearch("book", "book", "desc", "浅出");
+//		querySearch("book", "book", "desc", "语言");
+//		querySearch("book", "book", "desc", "编程");
+//		querySearch("article", "article", "content", "性虐");
+
+//		multiSearch("圆圆");
+
+//		count("book","desc","编程");
+
+//		matchQuery("book","desc","编程");
+
+//		booleanQuery();
+
+//		fuzzyLikeQuery();
+
+//		fuzzyQuery();
+
+//		matchAllQuery();
+
+//		prefixQuery();
+
+//		queryString();
+
+//		rangeQuery();
+
+//		termsQuery();
+
+//		wildcardQuery();
+
+//		indicesQuery();
+
+//		regexpQuery();
+
+//		suggest();
+	}
+
 	
 	/**
 	 * 创建索引
@@ -86,7 +162,147 @@ public class TransportClient {
 		IndexResponse response = client.prepareIndex(index, type).setSource(sourcecontent).execute().actionGet();
 		printIndexInfo(response);
 	}
-	
+
+	/**
+	 * bulkIndex
+	 * @throws Exception
+	 */
+	private static void bulkIndex() throws Exception{
+		Client client = createTransportClient();
+		BulkRequestBuilder bulkRequest = client.prepareBulk();
+		bulkRequest.add(client.prepareIndex("book", "book", "3")
+						.setSource(jsonBuilder()
+										.startObject()
+										.field("name", "Docker开发实践")
+										.field("author", "曾金龙 肖新华 刘清")
+										.field("pubinfo", "人民邮电出版社")
+										.field("pubtime", "2015-07-01")
+										.field("desc", "《Docker开发实践》由浅入深地介绍了Docker的实践之道，首先讲解Docker的概念、容器和镜像的相关操作、容器的数据管理等内容，接着通过不同类型的应用说明Docker的实际应用，然后介绍了网络、安全、API、管理工具Fig、Kubernetes、shipyard以及Docker三件套（Machine+Swarm+Compose）等，最后列举了常见镜像、Docker API等内容。")
+										.endObject()
+						)
+		);
+
+		bulkRequest.add(client.prepareIndex("book", "book", "4")
+						.setSource(jsonBuilder()
+										.startObject()
+										.field("name", "图灵程序设计丛书：Hadoop基础教程")
+										.field("author", "张治起")
+										.field("pubinfo", "人民邮电出版社")
+										.field("pubtime", "2014-01-01")
+										.field("desc", "《图灵程序设计丛书：Hadoop基础教程》包括三个主要部分：第1~5章讲述了Hadoop的核心机制及Hadoop的工作模式；第6~7章涵盖了Hadoop更多可操作的内容；第8~11章介绍了Hadoop与其他产品和技术的组合使用。《图灵程序设计丛书：Hadoop基础教程》目的在于帮助读者了解什么是Hadoop，Hadoop是如何工作的，以及如何使用Hadoop从数据中提取有价值的信息，并用它解决大数据问题")
+										.endObject()
+						)
+		);
+
+		BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+		if (bulkResponse.hasFailures()) {
+			BulkItemResponse[] bulkItemResponse = bulkResponse.getItems();
+			for (int i = 0; i <bulkItemResponse.length ; i++) {
+				System.out.println(bulkItemResponse[i].getItemId()+":"+bulkItemResponse[i].getIndex()+":"+bulkItemResponse[i].getFailureMessage());
+			}
+		}
+	}
+
+
+	/**
+	 *
+	 * @param index
+	 * @param type
+	 * @param id
+	 * @throws Exception
+	 */
+	private static void upsertIndex(String index,String type,String id) throws Exception{
+		Client client = createTransportClient();
+		IndexRequest indexRequest = new IndexRequest(index, type, id)
+				.source(jsonBuilder()
+						.startObject()
+						.field("name", "Hadoop权威指南（第3版 修订版）")
+						.field("author", "Tom White")
+						.field("pubinfo", "清华大学出版社")
+						.field("pubtime", "2015-01-01")
+						.field("desc", "《Hadoop权威指南（第3版 修订版）》通过丰富的案例学习来解释Hadoop的幕后机理，阐述了Hadoop如何解决现实生活中的具体问题。第3版覆盖Hadoop的最新动态，包括新增的MapReduceAPI，以及MapReduce2及其灵活性更强的执行模型（YARN）")
+						.endObject());
+		UpdateRequest updateRequest = new UpdateRequest(index, type, id)
+				.doc(jsonBuilder()
+						.startObject()
+						.field("author", "华东师范大学数据科学与工程学院")
+						.endObject())
+				.upsert(indexRequest);
+		UpdateResponse response = client.update(updateRequest).get();
+		System.out.println("索引是否更新:"+response.isCreated());
+		System.out.println("****************index ***********************");
+		// Index name
+		String _index = response.getIndex();
+		// Type name
+		String _type = response.getType();
+		// Document ID (generated or not)
+		String _id = response.getId();
+		// Version (if it's the first time you index this document, you will get: 1)
+		long _version = response.getVersion();
+		System.out.println(_index + "," + _type + "," + _id + "," + _version);
+	}
+
+	/**
+	 * 更新索引
+	 * @param index
+	 * @param type
+	 * @param id
+	 */
+	private static void updateIndexByScript(String index, String type, String id) throws Exception{
+		Client client = createTransportClient();
+		UpdateResponse response = client.prepareUpdate(index, type, id)
+				.setScript("ctx._source.author = \"闫洪磊\"", ScriptService.ScriptType.INLINE)
+				.setScript("ctx._source.name = \"Activiti实战\"", ScriptService.ScriptType.INLINE)
+				.setScript("ctx._source.pubinfo = \"机械工业出版社\"", ScriptService.ScriptType.INLINE)
+				.setScript("ctx._source.pubtime = \"2015-01-01\"", ScriptService.ScriptType.INLINE)
+				.setScript("ctx._source.desc = \"《Activiti实战 》立足于实践，不仅让读者知其然，全面掌握Activiti架构、功能、用法、技巧和最佳实践，广度足够；而且让读者知其所以然，深入理解Activiti的源代码实现、设计模式和PVM，深度也足够。\n" +
+						"　　《Activiti实战 》一共四个部分：准备篇（1~2章）介绍了Activiti的概念、特点、应用、体系结构，以及开发环境的搭建和配置；基础篇（3~4章）首先讲解了Activiti Modeler、Activiti Designer两种流程设计工具的详细使用，然后详细讲解了BPMN2.0规范；实战篇（5~14章）系统讲解了Activiti的用法、技巧和最佳实践，包含流程定义、流程实例、任务、子流程、多实例、事件以及监听器等；高级篇（15~21）通过集成WebService、规则引擎、JPA、ESB等各种服务和中间件来阐述了Activiti不仅仅是引擎，实际上是一个BPM平台，最后还通过源代码对它的设计模式及PVM进行了分析。\"", ScriptService.ScriptType.INLINE)
+				.execute()
+				.actionGet();
+		System.out.println("索引是否更新:"+response.isCreated());
+		System.out.println("****************index ***********************");
+		// Index name
+		String _index = response.getIndex();
+		// Type name
+		String _type = response.getType();
+		// Document ID (generated or not)
+		String _id = response.getId();
+		// Version (if it's the first time you index this document, you will get: 1)
+		long _version = response.getVersion();
+		System.out.println(_index + "," + _type + "," + _id + "," + _version);
+	}
+
+	/**
+	 * 更新索引
+	 * @param index
+	 * @param type
+	 * @param id
+	 */
+	private static void updateIndexByDoc(String index, String type, String id) throws Exception{
+		Client client = createTransportClient();
+		UpdateResponse response = client.prepareUpdate(index, type, id)
+				.setDoc(jsonBuilder()
+						.startObject()
+						.field("name", "Hadoop权威指南（第3版 修订版）")
+						.field("author", "Tom White")
+						.field("pubinfo", "清华大学出版社")
+						.field("pubtime", "2015-01-01")
+						.field("desc", "《Hadoop权威指南（第3版 修订版）》通过丰富的案例学习来解释Hadoop的幕后机理，阐述了Hadoop如何解决现实生活中的具体问题。第3版覆盖Hadoop的最新动态，包括新增的MapReduceAPI，以及MapReduce2及其灵活性更强的执行模型（YARN）")
+						.endObject())
+				.execute()
+				.actionGet();
+		System.out.println("索引是否更新:"+response.isCreated());
+		System.out.println("****************index ***********************");
+		// Index name
+		String _index = response.getIndex();
+		// Type name
+		String _type = response.getType();
+		// Document ID (generated or not)
+		String _id = response.getId();
+		// Version (if it's the first time you index this document, you will get: 1)
+		long _version = response.getVersion();
+		System.out.println(_index + "," + _type + "," + _id + "," + _version);
+	}
 	
 	/**
 	 * 仅仅只删除索引
@@ -114,7 +330,6 @@ public class TransportClient {
 		
 		//优化索引
 		OptimizeRequest optimizeRequest = new OptimizeRequest(index);
-		optimizeRequest.upgrade(true);
 	    OptimizeResponse optimizeResponse = client.admin().indices().optimize(optimizeRequest).actionGet();
 	    System.out.println(optimizeResponse.getTotalShards()+","+optimizeResponse.getSuccessfulShards()+","+optimizeResponse.getFailedShards());
 	    
@@ -125,8 +340,43 @@ public class TransportClient {
 		System.out.println(flushResponse.getTotalShards()+","+flushResponse.getSuccessfulShards()+","+flushResponse.getFailedShards());
 		
 	}
-	
-	
+
+	/**
+	 * 删除查询到的文档
+	 * @param index
+	 * @param name
+	 * @param value
+	 */
+	private static void scrollSearchDelete(String index,String name,String value){
+		Client client = createTransportClient();
+		QueryBuilder qb = termQuery(name, value);
+		SearchResponse scrollResp = client.prepareSearch(index)
+				.setSearchType(SearchType.SCAN)
+				.setScroll(new TimeValue(60000))
+				.setQuery(qb)
+				.setSize(100).execute().actionGet(); //100 hits per shard will be returned for each scroll
+
+		BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+		while (true) {
+			for (SearchHit hit : scrollResp.getHits().getHits()) {
+				bulkRequest.add(client.prepareDelete(hit.getIndex(),hit.getType(),hit.getId()));
+			}
+			scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(600000)).execute().actionGet();
+			if (scrollResp.getHits().getHits().length == 0) {
+				break;
+			}
+		}
+		BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+		if (bulkResponse.hasFailures()) {
+			BulkItemResponse[] bulkItemResponse = bulkResponse.getItems();
+			for (int i = 0; i <bulkItemResponse.length ; i++) {
+				System.out.println(bulkItemResponse[i].getItemId()+":"+bulkItemResponse[i].getIndex()+":"+bulkItemResponse[i].getFailureMessage());
+			}
+		}
+	}
+
+
 	/**
 	 * 删除所有索引
 	 * @param indices
@@ -189,7 +439,7 @@ public class TransportClient {
 		// 3.SearchType.COUNT = 不设置的话,这个为默认值,还有的自己去试试吧
         .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
         // 设置查询关键词
-        .setQuery(QueryBuilders.termQuery(term, queryString))             // Query
+        .setQuery(termQuery(term, queryString))             // Query
         //.setPostFilter(FilterBuilders.rangeFilter("age").from(12).to(18))   // Filter
         .addHighlightedField(term)
         .setHighlighterPreTags("<em>")
@@ -239,7 +489,7 @@ public class TransportClient {
 				// 3.SearchType.COUNT = 不设置的话,这个为默认值,还有的自己去试试吧
 		        .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		        // 设置查询关键词
-		        .setQuery(QueryBuilders.termQuery(term, queryString))             // Query
+		        .setQuery(termQuery(term, queryString))             // Query
 		        //.setPostFilter(FilterBuilders.rangeFilter("age").from(12).to(18))   // Filter
 		        .addHighlightedField(term)
 		        .setHighlighterPreTags("<em>")
@@ -273,10 +523,10 @@ public class TransportClient {
 	private static void multiSearch(String queryString){
 		Client client = createTransportClient();
 		SearchRequestBuilder srb1 = client.prepareSearch()
-				.setQuery(QueryBuilders.queryString(queryString));
+				.setQuery(QueryBuilders.queryStringQuery(queryString));
 		
 		SearchRequestBuilder srb2 = client.prepareSearch()
-		        .setQuery(QueryBuilders.matchQuery("desc",queryString));
+		        .setQuery(QueryBuilders.matchQuery("desc", queryString));
 
 		MultiSearchResponse sr = client.prepareMultiSearch()
 		        .add(srb1)
@@ -312,81 +562,13 @@ public class TransportClient {
 	private static void count(String indices,String field,String queryString){
 		Client client = createTransportClient();
 		CountResponse response = client.prepareCount(indices)
-		        .setQuery(QueryBuilders.termQuery(field, queryString))
+		        .setQuery(termQuery(field, queryString))
 		        .execute()
 		        .actionGet();
 		long count = response.getCount();
 		System.out.println("在文档"+indices+"中搜索字段"+field+"查询关键字:"+queryString+"共匹配到"+count+"条记录!");
 	}
-	
-	
-	public static void main(String[] args) throws Exception {
-		
-//		deleteIndices("article");
-//		deleteIndices("book");
-//		
-//		creatJsonStringIndex();
-//		creatMapIndex();
-//		creatBeanIndex();
-//		useXContentBuilderCreatIndex();
-		
-//		deleteIndex("book","book","1");
-//		deleteIndex("book","book","2");
-//		deleteIndex("book","book","3");
-		
-//		deleteIndex("article","article","1");
-//		deleteIndex("article","article","2");
-//		deleteIndex("article","article","3");
-		
-//		deleteIndices("article");
-		
-//		getIndex("book","book","1");
-//		getIndex("book","book","2");
-//		getIndex("book","book","3");
-//		getIndex("article","article","1");
-		
-//		querySearch("book", "book", "desc", "方面");
-//		querySearch("book", "book", "desc", "语言");
-//		querySearch("book", "book", "desc", "设计");
-//		querySearch("article", "article", "content", "圆圆");
-		
-//		querySearch("book", "book", "desc", "浅出");
-//		querySearch("book", "book", "desc", "语言");
-//		querySearch("book", "book", "desc", "编程");
-//		querySearch("article", "article", "content", "性虐");
-		
-//		multiSearch("圆圆");
-		
-//		count("book","desc","编程");
 
-//		matchquery("book","desc","编程");
-		
-//		booleanquery();
-		
-//		fuzzyLikeQuery();
-		
-//		fuzzyQuery();
-		
-//		matchAllQuery();
-		
-//		prefixQuery();
-		
-//		queryString();
-		
-//		rangeQuery();
-		
-//		termsQuery();
-		
-//		wildcardQuery();
-		
-//		indicesQuery();
-		
-//		regexpQuery();
-		
-		suggest();
-	}
-
-	
 	private static void suggest(){
 		Client client = createTransportClient();
 		
@@ -463,7 +645,7 @@ public class TransportClient {
 	
 	private static void indicesQuery() {
 		Client client = createTransportClient();
-		IndicesQueryBuilder indicesQuery = QueryBuilders.indicesQuery(QueryBuilders.termQuery("content", "性虐"), "news","article","book");
+		IndicesQueryBuilder indicesQuery = QueryBuilders.indicesQuery(termQuery("content", "性虐"), "news","article","book");
 		SearchResponse searchResponse = client.prepareSearch("article")
 				.setQuery(indicesQuery)
 		        .addHighlightedField("content")
@@ -614,7 +796,7 @@ public class TransportClient {
 	private static void queryString() {
 		Client client = createTransportClient();
 		SearchResponse searchResponse = client.prepareSearch("article")
-				.setQuery(QueryBuilders.queryString("女神 高圆圆 淤青 伤痕 床头"))
+				.setQuery(QueryBuilders.queryStringQuery("女神 高圆圆 淤青 伤痕 床头"))
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		        .addHighlightedField("content")
 		        .setHighlighterPreTags("<em>")
@@ -783,14 +965,14 @@ public class TransportClient {
 	/**
 	 * boolean query
 	 */
-	private static void booleanquery() {
+	private static void booleanQuery() {
 		Client client = createTransportClient();
 		QueryBuilder queryBuilder = QueryBuilders
                 .boolQuery()
-                .must(QueryBuilders.termQuery("desc", "结构"))
-                .must(QueryBuilders.termQuery("name", "深入"))
-                .mustNot(QueryBuilders.termQuery("desc", "性虐"))
-                .should(QueryBuilders.termQuery("desc", "GoWeb"));
+                .must(termQuery("desc", "结构"))
+                .must(termQuery("name", "深入"))
+                .mustNot(termQuery("desc", "性虐"))
+                .should(termQuery("desc", "GoWeb"));
 		SearchResponse searchResponse = client.prepareSearch("book")
 				.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		        .addHighlightedField("desc")
@@ -833,7 +1015,7 @@ public class TransportClient {
 	 * @param field
 	 * @param queryString
 	 */
-	private static void matchquery(String indices,String field,String queryString){
+	private static void matchQuery(String indices,String field,String queryString){
 		Client client = createTransportClient();
 		SearchResponse searchResponse = client.prepareSearch(indices)
 		        .setQuery(QueryBuilders.matchQuery(field, queryString))
