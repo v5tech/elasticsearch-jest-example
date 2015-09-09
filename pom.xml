@@ -15,16 +15,16 @@
 	</properties>
 
 	<dependencies>
-	
+
 		<dependency>
 			<groupId>io.searchbox</groupId>
 			<artifactId>jest</artifactId>
-			<version>0.1.4-SNAPSHOT</version>
+			<version>0.1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
-			<version>1.4.0</version>
+			<version>1.7.1</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
