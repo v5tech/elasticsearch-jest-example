@@ -65,7 +65,9 @@ public class TransportClient {
 	private static Client createTransportClient() {
 		//创建settings
 		Settings settings = ImmutableSettings.settingsBuilder()
-			.put("cluster.name", "elasticsearch").build();//设置集群名称
+			.put("cluster.name", "elasticsearch")//设置集群名称
+		    .put("shield.user", "admin:sysadmin")
+			.build();
 		Client client = null;
 		try {
 			client = new org.elasticsearch.client.transport.TransportClient(settings)
@@ -90,13 +92,14 @@ public class TransportClient {
 //		deleteIndex("book","book","2");
 //		deleteIndex("book","book","3");
 
-		updateIndexByDoc("book", "book", "1");
-		updateIndexByScript("book", "book", "1");
+//		updateIndexByDoc("book", "book", "AU-ytzQZ2hJMRScy9rds");
+//		updateIndexByScript("book", "book", "AU-ytzQZ2hJMRScy9rds");
+
 		upsertIndex("book", "book", "1");
 
-		bulkIndex();
+//		bulkIndex();
 
-		scrollSearchDelete("book", "desc", "语言");
+//		scrollSearchDelete("book", "desc", "语言");
 
 //		deleteIndex("article","article","1");
 //		deleteIndex("article","article","2");
@@ -113,38 +116,38 @@ public class TransportClient {
 //		querySearch("book", "book", "desc", "语言");
 //		querySearch("book", "book", "desc", "设计");
 //		querySearch("article", "article", "content", "圆圆");
-
+//
 //		querySearch("book", "book", "desc", "浅出");
 //		querySearch("book", "book", "desc", "语言");
 //		querySearch("book", "book", "desc", "编程");
 //		querySearch("article", "article", "content", "性虐");
 
 //		multiSearch("圆圆");
-
+//
 //		count("book","desc","编程");
-
+//
 //		matchQuery("book","desc","编程");
-
+//
 //		booleanQuery();
-
+//
 //		fuzzyLikeQuery();
-
+//
 //		fuzzyQuery();
-
+//
 //		matchAllQuery();
-
+//
 //		prefixQuery();
-
+//
 //		queryString();
-
+//
 //		rangeQuery();
-
+//
 //		termsQuery();
-
+//
 //		wildcardQuery();
-
+//
 //		indicesQuery();
-
+//
 //		regexpQuery();
 
 //		suggest();
@@ -243,7 +246,7 @@ public class TransportClient {
 	}
 
 	/**
-	 * 更新索引
+	 * 更新索引  https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-scripting.html
 	 * @param index
 	 * @param type
 	 * @param id
@@ -251,12 +254,16 @@ public class TransportClient {
 	private static void updateIndexByScript(String index, String type, String id) throws Exception{
 		Client client = createTransportClient();
 		UpdateResponse response = client.prepareUpdate(index, type, id)
-				.setScript("ctx._source.author = \"闫洪磊\"", ScriptService.ScriptType.INLINE)
-				.setScript("ctx._source.name = \"Activiti实战\"", ScriptService.ScriptType.INLINE)
-				.setScript("ctx._source.pubinfo = \"机械工业出版社\"", ScriptService.ScriptType.INLINE)
-				.setScript("ctx._source.pubtime = \"2015-01-01\"", ScriptService.ScriptType.INLINE)
-				.setScript("ctx._source.desc = \"《Activiti实战 》立足于实践，不仅让读者知其然，全面掌握Activiti架构、功能、用法、技巧和最佳实践，广度足够；而且让读者知其所以然，深入理解Activiti的源代码实现、设计模式和PVM，深度也足够。\n" +
-						"　　《Activiti实战 》一共四个部分：准备篇（1~2章）介绍了Activiti的概念、特点、应用、体系结构，以及开发环境的搭建和配置；基础篇（3~4章）首先讲解了Activiti Modeler、Activiti Designer两种流程设计工具的详细使用，然后详细讲解了BPMN2.0规范；实战篇（5~14章）系统讲解了Activiti的用法、技巧和最佳实践，包含流程定义、流程实例、任务、子流程、多实例、事件以及监听器等；高级篇（15~21）通过集成WebService、规则引擎、JPA、ESB等各种服务和中间件来阐述了Activiti不仅仅是引擎，实际上是一个BPM平台，最后还通过源代码对它的设计模式及PVM进行了分析。\"", ScriptService.ScriptType.INLINE)
+				.setScript("ctx._source.author = \"闫洪磊\";" +
+						"ctx._source.name = \"Activiti实战\";" +
+						"ctx._source.pubinfo = \"机械工业出版社\";" +
+						"ctx._source.pubtime = \"2015-01-01\";" +
+						"ctx._source.desc = \"《Activiti实战 》立足于实践，不仅让读者知其然，全面掌握Activiti架构、功能、用法、技巧和最佳实践，广度足够；而且让读者知其所以然，深入理解Activiti的源代码实现、设计模式和PVM，深度也足够。《Activiti实战 》一共四个部分：准备篇（1~2章）介绍了Activiti的概念、特点、应用、体系结构，以及开发环境的搭建和配置；基础篇（3~4章）首先讲解了Activiti Modeler、Activiti Designer两种流程设计工具的详细使用，然后详细讲解了BPMN2.0规范；实战篇（5~14章）系统讲解了Activiti的用法、技巧和最佳实践，包含流程定义、流程实例、任务、子流程、多实例、事件以及监听器等；高级篇（15~21）通过集成WebService、规则引擎、JPA、ESB等各种服务和中间件来阐述了Activiti不仅仅是引擎，实际上是一个BPM平台，最后还通过源代码对它的设计模式及PVM进行了分析。\"", ScriptService.ScriptType.INLINE)
+//				.setScript("ctx._source.author = \"闫洪磊\"", ScriptService.ScriptType.INLINE)
+//				.setScript("ctx._source.name = \"Activiti实战\"", ScriptService.ScriptType.INLINE)
+//				.setScript("ctx._source.pubinfo = \"机械工业出版社\"", ScriptService.ScriptType.INLINE)
+//				.setScript("ctx._source.pubtime = \"2015-01-01\"", ScriptService.ScriptType.INLINE)
+//				.setScript("ctx._source.desc = \"《Activiti实战 》立足于实践，不仅让读者知其然，全面掌握Activiti架构、功能、用法、技巧和最佳实践，广度足够；而且让读者知其所以然，深入理解Activiti的源代码实现、设计模式和PVM，深度也足够。《Activiti实战 》一共四个部分：准备篇（1~2章）介绍了Activiti的概念、特点、应用、体系结构，以及开发环境的搭建和配置；基础篇（3~4章）首先讲解了Activiti Modeler、Activiti Designer两种流程设计工具的详细使用，然后详细讲解了BPMN2.0规范；实战篇（5~14章）系统讲解了Activiti的用法、技巧和最佳实践，包含流程定义、流程实例、任务、子流程、多实例、事件以及监听器等；高级篇（15~21）通过集成WebService、规则引擎、JPA、ESB等各种服务和中间件来阐述了Activiti不仅仅是引擎，实际上是一个BPM平台，最后还通过源代码对它的设计模式及PVM进行了分析。\"", ScriptService.ScriptType.INLINE)
 				.execute()
 				.actionGet();
 		System.out.println("索引是否更新:"+response.isCreated());
