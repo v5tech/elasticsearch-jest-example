@@ -3,6 +3,8 @@
 .project
 .settings
 target
+.idea
+.impl
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

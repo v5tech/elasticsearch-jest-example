@@ -1,4 +1,4 @@
-package net.aimeizi.jest;
+package net.aimeizi.model;
 
 import io.searchbox.annotations.JestId;
 

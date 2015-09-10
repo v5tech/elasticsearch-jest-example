@@ -2,7 +2,7 @@ package net.aimeizi.jest.client.elasticsearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.aimeizi.jest.Article;
+import net.aimeizi.model.Article;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
@@ -13,9 +13,7 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.count.CountResponse;
-import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -160,7 +158,7 @@ public class TransportClient {
 	 * @param type  索引type
 	 * @param sourcecontent 要索引的内容
 	 */
-	private static void createIndex(String index,String type,String sourcecontent) {
+	public static void createIndex(String index,String type,String sourcecontent) {
 		Client client = createTransportClient();
 		IndexResponse response = client.prepareIndex(index, type).setSource(sourcecontent).execute().actionGet();
 		printIndexInfo(response);
@@ -933,7 +931,7 @@ public class TransportClient {
 		}
 	}
 
-
+	@SuppressWarnings("deprecation")
 	private static void fuzzyLikeQuery() {
 		Client client = createTransportClient();
 		SearchResponse searchResponse = client.prepareSearch("article")

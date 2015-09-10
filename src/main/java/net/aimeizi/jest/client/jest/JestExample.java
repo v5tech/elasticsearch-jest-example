@@ -10,7 +10,7 @@ import io.searchbox.cluster.NodesStats;
 import io.searchbox.core.*;
 import io.searchbox.core.SearchResult.Hit;
 import io.searchbox.indices.*;
-import net.aimeizi.jest.Article;
+import net.aimeizi.model.Article;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.highlight.HighlightBuilder;
