@@ -1096,6 +1096,50 @@ POST http://127.0.0.1:9200/countries/_search?pretty
 }
 ```
 
+### 高亮查询(highlight)
+
+```
+POST http://127.0.0.1:9200/news/_search?q=李克强
+{
+    "query" : {
+        match_all:{}
+    },
+    "highlight" : {
+        "pre_tags" : ["<font color='red'>", "<b>", "<em>"],
+        "post_tags" : ["</font>", "<b>", "</em>"],
+        "fields" : [
+            {"title" : {}},
+            {"content" : {
+                "fragment_size" : 350,
+                "number_of_fragments" : 3,
+                "no_match_size": 150
+            }}
+        ]
+    }
+}
+```
+
+```
+POST http://127.0.0.1:9200/news/_search?q=李克强
+{
+    "query" : {
+        match_all:{}
+    },
+    "highlight" : {
+        "pre_tags" : ["<font color='red'><b><em>"],
+        "post_tags" : ["</font><b></em>"],
+        "fields" : [
+            {"title" : {}},
+            {"content" : {
+                "fragment_size" : 350,
+                "number_of_fragments" : 3,
+                "no_match_size": 150
+            }}
+        ]
+    }
+}
+```
+
 ### 删除索引
 
 https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
