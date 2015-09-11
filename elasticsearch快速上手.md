@@ -1094,6 +1094,96 @@ POST http://127.0.0.1:9200/countries/_search?pretty
 }
 ```
 
+### 删除索引
+
+```
+DELETE http://127.0.0.1:9200/news/article
+```
+
+### 查看mapping
+
+```
+GET http://127.0.0.1:9200/news/_mapping/article
+```
+
+输出:
+
+```
+{
+  "news": {
+    "mappings": {
+      "article": {
+        "properties": {
+          "author": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "id": {
+            "type": "long"
+          },
+          "pubdate": {
+            "type": "date",
+            "store": true,
+            "format": "yyyy-MM-dd HH:mm:ss"
+          },
+          "source": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### 创建或修改mapping
+
+```
+PUT http://127.0.0.1:9200/news/_mapping/article
+{
+  "article": {
+    "properties": {
+      "pubdate": {
+        "type": "date",
+        "format": "dateOptionalTime"
+      },
+      "author": {
+        "type": "string"
+      },
+      "content": {
+        "type": "string"
+      },
+      "id": {
+        "type": "long"
+      },
+      "source": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string"
+      }
+    }
+  }
+}
+```
+
+### 删除mapping
+
+```
+DELETE http://127.0.0.1:9200/news/_mapping/article
+```
+
 ### ansj分词器测试
 
 http://127.0.0.1:9200/news/_analyze?analyzer=ansj_index&text=习近平
