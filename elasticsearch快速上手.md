@@ -1,6 +1,6 @@
-> elasticsearch rest api 快速上手
+# elasticsearch rest api 快速上手
 
-注：本文档中除无特别说明，请求方式均为`GET`。所有的请求均在`Sense`中测试通过
+> 注：本文档中除无特别说明，请求方式均为`GET`。所有的请求均在`Sense`中测试通过
 
 遵循的格式为
 
@@ -943,6 +943,7 @@ POST http://127.0.0.1:9200/countries/_search?pretty
 
 * match_phrase
 
+```
 POST http://127.0.0.1:9200/countries/_search?pretty
 {
     "query": {
@@ -951,6 +952,7 @@ POST http://127.0.0.1:9200/countries/_search?pretty
         }
     }
 }
+```
 
 * must
 
@@ -1096,11 +1098,70 @@ POST http://127.0.0.1:9200/countries/_search?pretty
 
 ### 删除索引
 
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-index.html
+
 ```
-DELETE http://127.0.0.1:9200/news/article
+DELETE http://127.0.0.1:9200/news
+```
+
+### 创建索引
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html
+
+```
+PUT http://127.0.0.1:9200/news
+```
+
+### 创建或修改mapping
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-put-mapping.html
+
+```
+PUT /{index}/_mapping/{type}
+```
+
+```
+PUT http://127.0.0.1:9200/news/_mapping/article
+{
+  "article": {
+    "properties": {
+      "pubdate": {
+        "type": "date",
+        "format": "dateOptionalTime"
+      },
+      "author": {
+        "type": "string"
+      },
+      "content": {
+        "type": "string"
+      },
+      "id": {
+        "type": "long"
+      },
+      "source": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string"
+      }
+    }
+  }
+}
 ```
 
 ### 查看mapping
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-mapping.html
+
+
+```
+GET http://127.0.0.1:9200/_all/_mapping
+
+GET http://127.0.0.1:9200/_mapping
+```
 
 ```
 GET http://127.0.0.1:9200/news/_mapping/article
@@ -1144,41 +1205,17 @@ GET http://127.0.0.1:9200/news/_mapping/article
 }
 ```
 
-### 创建或修改mapping
-
-```
-PUT http://127.0.0.1:9200/news/_mapping/article
-{
-  "article": {
-    "properties": {
-      "pubdate": {
-        "type": "date",
-        "format": "dateOptionalTime"
-      },
-      "author": {
-        "type": "string"
-      },
-      "content": {
-        "type": "string"
-      },
-      "id": {
-        "type": "long"
-      },
-      "source": {
-        "type": "string"
-      },
-      "title": {
-        "type": "string"
-      },
-      "url": {
-        "type": "string"
-      }
-    }
-  }
-}
-```
-
 ### 删除mapping
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-delete-mapping.html
+
+```
+[DELETE] /{index}/{type}
+
+[DELETE] /{index}/{type}/_mapping
+
+[DELETE] /{index}/_mapping/{type}
+```
 
 ```
 DELETE http://127.0.0.1:9200/news/_mapping/article
