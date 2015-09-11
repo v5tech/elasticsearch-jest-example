@@ -14,7 +14,7 @@
        <context:component-scan base-package="net.aimeizi" />
        <context:property-placeholder location="jdbc.properties"/>
        <!-- 数据库表初始化 -->
-       <jdbc:initialize-database data-source="dataSource" enabled="true">
+       <jdbc:initialize-database data-source="dataSource" enabled="false">
            <jdbc:script location="classpath:sql.sql"/>
        </jdbc:initialize-database>
        <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">

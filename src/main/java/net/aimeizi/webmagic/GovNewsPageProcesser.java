@@ -1,7 +1,5 @@
 package net.aimeizi.webmagic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.aimeizi.jest.client.elasticsearch.TransportClient;
 import net.aimeizi.model.Article;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -9,10 +7,6 @@ import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.processor.PageProcessor;
-
-import java.text.SimpleDateFormat;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 爬取中央政府网要闻、热点、部门新闻、地方报道、执法监管等新闻信息
@@ -39,36 +33,26 @@ public class GovNewsPageProcesser implements PageProcessor {
             // 添加列表页请求链接
             page.addTargetRequests(page.getHtml().links().regex(URL_LIST).all());
         }else{// 详情页
-            page.putField("title", page.getHtml().xpath("//div[@class='pages-title']").toString());
-            page.putField("content", page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages_content']/table[@id='printContent']/tbody/tr/td").toString());
-            page.putField("source",page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages-date']/span[@class='font'][2]").toString().replace("来源： ", ""));
-            page.putField("author",page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages_content']/div[@class='editor']").toString().replace("责任编辑： ", ""));
-            page.putField("create",page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages-date']").toString());
+            page.putField("title", Utils.replaceHTML(page.getHtml().xpath("//div[@class='pages-title']").toString()));
+            page.putField("content", Utils.replaceHTML(page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages_content']/table[@id='printContent']/tbody/tr/td").toString()));
+            page.putField("source",Utils.replaceHTML(page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages-date']/span[@class='font'][2]").toString().replace("来源： ", "")));
+            page.putField("author",Utils.replaceHTML(page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages_content']/div[@class='editor']").toString().replace("责任编辑： ", "")));
+            page.putField("create",Utils.replaceHTML(page.getHtml().xpath("//div[@class='article-colum']/div[@class='pages-date']").toString()));
             page.putField("url",page.getUrl().get());
-            // 索引article
-            Article article = new Article();
-            article.setTitle(replaceHTML((String)page.getResultItems().get("title")));
-            article.setContent(replaceHTML((String) page.getResultItems().get("content")));
-            article.setSource(replaceHTML((String) page.getResultItems().get("source")));
-            article.setAuthor(replaceHTML((String) page.getResultItems().get("author")));
-            try {
-                String dataStr = replaceHTML((String) page.getResultItems().get("create"));
-                Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}");
-                Matcher matcher = pattern.matcher(dataStr);
-                if(matcher.find()){
-                    dataStr = matcher.group(0);
-                }
-                article.setPubdate(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dataStr));
-            }catch (Exception e){
-            }
-            article.setUrl(page.getUrl().get());
 
-            // 创建索引
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                TransportClient.createIndex("news","article",mapper.writeValueAsString(article));
-            }catch (Exception e){
-            }
+            String title = (String)page.getResultItems().get("title");
+            String content = (String)page.getResultItems().get("content");
+            String create = (String)page.getResultItems().get("create");
+            String source = (String)page.getResultItems().get("source");
+            String url = (String)page.getResultItems().get("url");
+            String author = (String)page.getResultItems().get("author");
+
+            // 创建article
+            Article article = Utils.createArticle(title, content, source, author, url, create);
+
+            // 索引
+
+            Utils.index(article);
 
         }
     }
@@ -83,7 +67,7 @@ public class GovNewsPageProcesser implements PageProcessor {
      * @return
      */
     private static String replaceHTML(String str){
-        return str.replaceAll("\\<.*?>","").replaceAll("&nbsp;","");
+        return str!=null?str.replaceAll("\\<.*?>","").replaceAll("&nbsp;",""):"";
     }
 
     public static void main(String[] args) {

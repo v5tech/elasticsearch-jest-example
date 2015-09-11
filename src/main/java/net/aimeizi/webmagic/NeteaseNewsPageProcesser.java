@@ -1,12 +1,20 @@
 package net.aimeizi.webmagic;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import net.aimeizi.jest.client.elasticsearch.TransportClient;
+import net.aimeizi.model.Article;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Administrator on 2015/9/9 0009.
@@ -28,11 +36,27 @@ public class NeteaseNewsPageProcesser implements PageProcessor {
             page.addTargetRequests(page.getHtml().links().regex(URL_POST).all());
             page.addTargetRequests(page.getHtml().links().regex(URL_LIST).all());
         }else{
-            page.putField("title", page.getHtml().xpath("//h1[@id='h1title']").toString());
-            page.putField("content", page.getHtml().xpath("//div[@id='endText']").toString());
-            page.putField("pubtime", page.getHtml().xpath("//div[@class=\"ep-time-soure cDGray\"]").toString());
-            page.putField("source",page.getHtml().xpath("//a[@id=\"ne_article_source\"]/text()").toString());
-            page.putField("url",page.getUrl().get());
+
+            page.putField("title", Utils.replaceHTML(page.getHtml().xpath("//h1[@id='h1title']").toString()));
+            page.putField("content", Utils.replaceHTML(page.getHtml().xpath("//div[@id='endText']").toString()));
+            page.putField("create", Utils.replaceHTML(page.getHtml().xpath("//div[@class=\"ep-time-soure cDGray\"]").toString()));
+            page.putField("source", Utils.replaceHTML(page.getHtml().xpath("//a[@id=\"ne_article_source\"]/text()").toString()));
+            page.putField("url", page.getUrl().get());
+
+            String title = (String)page.getResultItems().get("title");
+            String content = (String)page.getResultItems().get("content");
+            String create = (String)page.getResultItems().get("create");
+            String source = (String)page.getResultItems().get("source");
+            String url = (String)page.getResultItems().get("url");
+            String author = "";
+
+            // 创建article
+            Article article = Utils.createArticle(title, content, source, author, url, create);
+
+            // 索引
+
+            Utils.index(article);
+
         }
     }
 
@@ -40,11 +64,15 @@ public class NeteaseNewsPageProcesser implements PageProcessor {
         return site;
     }
 
+
+
     public static void main(String[] args) {
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+        JdbcPipeline jdbcPipeline = (JdbcPipeline)applicationContext.getBean("jdbcPipeline");
         Spider.create(new NeteaseNewsPageProcesser())
                 .addUrl("http://news.163.com/domestic")
                 .addUrl("http://news.163.com/shehui")
-                .addPipeline(new ConsolePipeline())
+                .addPipeline(jdbcPipeline)
                 .thread(5)
                 .run();
     }

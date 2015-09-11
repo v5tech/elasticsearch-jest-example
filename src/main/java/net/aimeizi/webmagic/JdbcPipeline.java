@@ -27,12 +27,12 @@ public class JdbcPipeline implements Pipeline {
         Map<String,Object> items = resultItems.getAll();
         if(resultItems!=null&&resultItems.getAll().size()>0){
             Article article = new Article();
-            article.setTitle(replaceHTML((String) items.get("title")));
-            article.setContent(replaceHTML((String) items.get("content")));
-            article.setSource(replaceHTML((String) items.get("source")));
-            article.setAuthor(replaceHTML((String) items.get("author")));
+            article.setTitle((String) items.get("title"));
+            article.setContent((String) items.get("content"));
+            article.setSource((String) items.get("source"));
+            article.setAuthor((String) items.get("author"));
             article.setUrl((String)items.get("url"));
-            String dataStr = replaceHTML((String)items.get("create"));
+            String dataStr = (String)items.get("create");
             Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}");
             Matcher matcher = pattern.matcher(dataStr);
             if(matcher.find()){
@@ -45,14 +45,5 @@ public class JdbcPipeline implements Pipeline {
             }
             articleDao.save(article);
         }
-    }
-
-    /**
-     * html字符过滤
-     * @param str
-     * @return
-     */
-    private static String replaceHTML(String str){
-        return str.replaceAll("\\<.*?>","").replaceAll("&nbsp;","");
     }
 }
