@@ -1,4 +1,4 @@
-package net.aimeizi.jest.client.elasticsearch;
+package net.aimeizi.client.elasticsearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -93,7 +93,7 @@ public class TransportClient {
 //		updateIndexByDoc("book", "book", "AU-ytzQZ2hJMRScy9rds");
 //		updateIndexByScript("book", "book", "AU-ytzQZ2hJMRScy9rds");
 
-		upsertIndex("book", "book", "1");
+//		upsertIndex("book", "book", "1");
 
 //		bulkIndex();
 

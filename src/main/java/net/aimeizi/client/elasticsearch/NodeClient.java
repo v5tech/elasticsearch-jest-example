@@ -1,4 +1,4 @@
-package net.aimeizi.jest.client.elasticsearch;
+package net.aimeizi.client.elasticsearch;
 
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;

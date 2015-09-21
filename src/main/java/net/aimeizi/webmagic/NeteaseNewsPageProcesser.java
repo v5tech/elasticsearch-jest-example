@@ -1,7 +1,7 @@
 package net.aimeizi.webmagic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.aimeizi.jest.client.elasticsearch.TransportClient;
+import net.aimeizi.client.elasticsearch.TransportClient;
 import net.aimeizi.model.Article;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

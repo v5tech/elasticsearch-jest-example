@@ -1,7 +1,7 @@
 package net.aimeizi.webmagic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.aimeizi.jest.client.elasticsearch.TransportClient;
+import net.aimeizi.client.elasticsearch.TransportClient;
 import net.aimeizi.model.Article;
 
 import java.text.SimpleDateFormat;
