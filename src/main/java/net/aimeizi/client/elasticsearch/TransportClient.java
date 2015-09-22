@@ -1,4 +1,4 @@
-package net.aimeizi.jest.client.elasticsearch;
+package net.aimeizi.client.elasticsearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,7 +64,7 @@ public class TransportClient {
 		//创建settings
 		Settings settings = ImmutableSettings.settingsBuilder()
 			.put("cluster.name", "elasticsearch")//设置集群名称
-		    .put("shield.user", "admin:sysadmin")
+//		    .put("shield.user", "admin:sysadmin")
 			.build();
 		Client client = null;
 		try {
@@ -93,7 +93,7 @@ public class TransportClient {
 //		updateIndexByDoc("book", "book", "AU-ytzQZ2hJMRScy9rds");
 //		updateIndexByScript("book", "book", "AU-ytzQZ2hJMRScy9rds");
 
-		upsertIndex("book", "book", "1");
+//		upsertIndex("book", "book", "1");
 
 //		bulkIndex();
 
@@ -109,7 +109,7 @@ public class TransportClient {
 //		getIndex("book","book","2");
 //		getIndex("book","book","3");
 //		getIndex("article","article","1");
-
+//
 //		querySearch("book", "book", "desc", "方面");
 //		querySearch("book", "book", "desc", "语言");
 //		querySearch("book", "book", "desc", "设计");

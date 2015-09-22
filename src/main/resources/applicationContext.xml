@@ -12,7 +12,7 @@
         http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
        <context:component-scan base-package="net.aimeizi" />
-       <context:property-placeholder location="jdbc.properties"/>
+       <context:property-placeholder location="classpath*:jdbc.properties"/>
        <!-- 数据库表初始化 -->
        <jdbc:initialize-database data-source="dataSource" enabled="false">
            <jdbc:script location="classpath:sql.sql"/>

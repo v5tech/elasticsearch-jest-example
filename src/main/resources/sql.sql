@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS `news`;
 CREATE TABLE `news` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(100) DEFAULT NULL,
-  `content` varchar(9000) DEFAULT NULL,
+  `content` mediumtext,
   `url` varchar(100) DEFAULT NULL,
   `source` varchar(50) DEFAULT NULL,
   `author` varchar(50) DEFAULT NULL,

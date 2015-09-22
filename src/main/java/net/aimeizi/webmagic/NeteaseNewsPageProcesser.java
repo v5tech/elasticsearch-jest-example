@@ -1,20 +1,12 @@
 package net.aimeizi.webmagic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.aimeizi.jest.client.elasticsearch.TransportClient;
 import net.aimeizi.model.Article;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
-import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
-
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by Administrator on 2015/9/9 0009.

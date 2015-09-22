@@ -1,5 +1,6 @@
-package net.aimeizi.jest.client.jest;
+package net.aimeizi.client.jest;
 
+import com.google.gson.GsonBuilder;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
 import io.searchbox.client.JestResult;
@@ -25,7 +26,7 @@ public class JestExample {
 //		createIndex();
 //		bulkIndex();
 		createSearch("性虐");
-//		searchAll();
+		searchAll();
 //		getDocument("article", "article", "1");
 //		getDocument("article","article","2");
 //		getDocument("article","article","3");
@@ -171,7 +172,7 @@ public class JestExample {
 				"        \"author\" : \""+article.getAuthor()+"\"," +
 				"        \"source\" : \""+article.getSource()+"\"," +
 				"        \"url\" : \""+article.getUrl()+"\"," +
-				"        \"pubdate\" : \""+new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(article.getPubdate())+"\"" +
+				"        \"pubdate\" : \""+new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(article.getPubdate())+"\"" +
 				"    }" +
 				"}";
 		Update update = new Update.Builder(script).index(index).type(type).id(id).build();
@@ -392,6 +393,7 @@ public class JestExample {
 		JestClientFactory factory = new JestClientFactory();
 		 factory.setHttpClientConfig(new HttpClientConfig
 		                        .Builder("http://127.0.0.1:9200")
+		                        .gson(new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create())
 		                        .multiThreaded(true)
 		                        .build());
 		 JestClient client = factory.getObject();
