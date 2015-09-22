@@ -395,6 +395,7 @@ public class JestExample {
 		                        .Builder("http://127.0.0.1:9200")
 		                        .gson(new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create())
 		                        .multiThreaded(true)
+		                        .readTimeout(10000)
 		                        .build());
 		 JestClient client = factory.getObject();
 		 return client;

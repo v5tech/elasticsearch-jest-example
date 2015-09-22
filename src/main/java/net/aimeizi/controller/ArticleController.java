@@ -17,7 +17,7 @@ import java.util.Map;
 @Controller
 public class ArticleController {
 
-	@Autowired
+    @Autowired
 //	@Resource
     private ArticleService articleService;
 
@@ -35,20 +35,20 @@ public class ArticleController {
         String older = request.getParameter("older");
         String pageNumber = request.getParameter("pageNumber");
         String pageSize = request.getParameter("pageSize");
-        if(StringUtils.isEmpty(queryString)){
+        if (StringUtils.isEmpty(queryString)) {
             return modelAndView;
         }
         try {
-            if(StringUtils.isEmpty(pageNumber)||StringUtils.isEmpty(pageSize)){
+            if (StringUtils.isEmpty(pageNumber) || StringUtils.isEmpty(pageSize)) {
                 pageNumber = String.valueOf("1");
                 pageSize = String.valueOf("10");
             }
             Map<String, Object> maps = articleService.search(field, queryString, older, Integer.parseInt(pageNumber), Integer.parseInt(pageSize));
             modelAndView.addObject("queryString", queryString);
             modelAndView.addObject("articles", (List<Article>) maps.get("articles"));
-            long count = (Long)maps.get("count");
+            long count = (Long) maps.get("count");
             modelAndView.addObject("count", count);
-            modelAndView.addObject("took", (Long)maps.get("took"));
+            modelAndView.addObject("took", (Long) maps.get("took"));
             modelAndView.addObject("field", field);
             modelAndView.addObject("older", older);
             modelAndView.addObject("pageNumber", pageNumber);
