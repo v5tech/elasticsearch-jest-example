@@ -21,7 +21,7 @@
         .bs-docs-footer {
             padding-top: 40px;
             padding-bottom: 40px;
-            margin-top: 100px;
+            margin-top: 420px;
             color: #767676;
             text-align: center;
             border-top: 1px solid #e5e5e5;
@@ -198,7 +198,7 @@
 </div>
 <footer class="bs-docs-footer">
     <div class="container">
-        elasticsearch-jest
+        <h1>elasticsearch jest client</h1>
     </div>
 </footer>
 <!--返回顶部开始-->
