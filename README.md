@@ -196,7 +196,7 @@ http://127.0.0.1:9200/news/_search?q=source:新华网&analyzer=ansj_index&size=5
 
 * 其中`ansj_index`为在`elasticsearch.yml`文件中配置的`ansj`分词器
 
-[elasticsearch rest api 快速上手](https://github.com/sxyx2008/elasticsearch/issues/5)
+[elasticsearch rest api 快速上手](https://github.com/ameizi/elasticsearch/issues/5)
 
 ### elasticsearch-jdbc
 
@@ -235,4 +235,4 @@ echo {^
 }^ | "%JAVA_HOME%\bin\java" -cp "%LIB%" -Dlog4j.configurationFile="file://%DIR%\log4j2.xml" "org.xbib.tools.Runner" "org.xbib.tools.JDBCImporter"
 ```
 
-[elasticsearch-jdbc 插件的使用](https://github.com/sxyx2008/elasticsearch/issues/3)
+[elasticsearch-jdbc 插件的使用](https://github.com/ameizi/elasticsearch/issues/3)
